@@ -5,7 +5,7 @@
     "email": "mjrskiles@gmail.com"
   },
   "description": "Plugins for hacking, development workflows, and greenfield projects",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "license": "MIT",
   "keywords": [
     "vibe-hacker",

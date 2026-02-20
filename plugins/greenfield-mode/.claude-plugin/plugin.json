@@ -1,6 +1,6 @@
 {
   "name": "greenfield-mode",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Prevent backwards-compatibility cruft in prototype projects",
   "author": {
     "name": "Michael Skiles",

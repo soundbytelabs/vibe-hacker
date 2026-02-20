@@ -103,7 +103,6 @@ is_strict_mode() {
 
 # Exit early if greenfield mode not enabled
 if ! is_greenfield_enabled; then
-    echo '{"decision": "approve", "reason": "Greenfield mode not enabled"}'
     exit 0
 fi
 
@@ -207,7 +206,6 @@ main() {
     fi
 
     if [[ -z "$file_path" || ! -f "$file_path" ]]; then
-        echo '{"decision": "approve", "reason": "No file to check"}'
         exit 0
     fi
 
@@ -246,7 +244,6 @@ EOF
         fi
     fi
 
-    echo '{"decision": "approve", "reason": "No cruft detected"}'
     exit 0
 }
 

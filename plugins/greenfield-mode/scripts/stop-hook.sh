@@ -10,13 +10,10 @@ CONFIG_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/vibe-hacker.json"
 if [[ -f "$CONFIG_FILE" ]]; then
     enabled=$(jq -r '.greenfield_mode // false' "$CONFIG_FILE" 2>/dev/null || echo "false")
     if [[ "$enabled" == "true" ]]; then
-        # Inject greenfield reminder into Claude's context via additionalContext
+        # Inject greenfield reminder via systemMessage (Stop has no hookSpecificOutput support)
         cat << 'EOF'
 {
-  "hookSpecificOutput": {
-    "hookEventName": "Stop",
-    "additionalContext": "GREENFIELD SESSION ENDING: Before completing, verify no backwards-compatibility cruft was introduced. Check for: deprecation comments, legacy/obsolete markers, re-exports for compatibility, _unused variable renames, migration documentation. Delete old code entirely - don't deprecate or comment it out."
-  }
+  "systemMessage": "GREENFIELD SESSION ENDING: Before completing, verify no backwards-compatibility cruft was introduced. Check for: deprecation comments, legacy/obsolete markers, re-exports for compatibility, _unused variable renames, migration documentation. Delete old code entirely - don't deprecate or comment it out."
 }
 EOF
         exit 0

@@ -1,6 +1,6 @@
 {
   "name": "planning",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Structured planning documents (ADRs, FDPs, Action Plans) with protected paths",
   "author": {
     "name": "Michael Skiles",

@@ -24,22 +24,14 @@ if [[ -f "$ROADMAP_FILE" ]]; then
     # Display to user terminal (stderr)
     echo "ROADMAP UPDATE REMINDER - Review before compaction" >&2
 
-    # Inject reminder into Claude's context (stdout JSON)
-    context="ROADMAP UPDATE REMINDER: Before context compaction, please review and update the project roadmap at $PLANNING_ROOT/roadmap.md:
+    # Inject reminder via systemMessage (PreCompact has no hookSpecificOutput support)
+    context="ROADMAP UPDATE REMINDER: Before context compaction, please review and update the project roadmap at $PLANNING_ROOT/roadmap.md:\n\n1. Move completed items to 'Recently Completed' section\n2. Update 'Immediate' goals based on current progress\n3. Adjust priorities in 'Medium Term' and 'Long Term' as needed\n4. Update the 'Last updated' date"
 
-1. Move completed items to 'Recently Completed' section
-2. Update 'Immediate' goals based on current progress
-3. Adjust priorities in 'Medium Term' and 'Long Term' as needed
-4. Update the 'Last updated' date"
-
-    context=$(echo "$context" | jq -Rs '.')
+    context=$(echo -e "$context" | jq -Rs '.')
 
     cat <<EOF
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PreCompact",
-    "additionalContext": ${context}
-  }
+  "systemMessage": ${context}
 }
 EOF
 fi

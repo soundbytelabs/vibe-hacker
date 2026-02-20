@@ -61,15 +61,15 @@ Defines plugin metadata and references hook configuration:
 
 Configures hooks:
 
-| Hook | Matcher | Type | Script/Prompt |
-|------|---------|------|---------------|
-| SessionStart | (all) | command | `prime.sh --full` |
-| SessionStart | compact | command | `prime.sh --full` (re-prime after compaction) |
-| PreCompact | (all) | command | `precompact-roadmap.sh` (roadmap reminder) |
-| PreToolUse | Edit\|Write | command | `check-protected-paths.sh` |
-| PostToolUse | Edit\|Write | command | `check-legacy-cruft.sh --warn-only` |
-| PostToolUse | (all) | command | `log-tool-result.sh` (debug mode) |
-| Stop | (all) | prompt | Haiku greenfield review |
+| Hook | Matcher | Type | Script/Prompt | Output Pattern |
+|------|---------|------|---------------|----------------|
+| SessionStart | (all) | command | `prime.sh` | `hookSpecificOutput.additionalContext` |
+| SessionStart | compact | command | `prime.sh` (re-prime after compaction) | `hookSpecificOutput.additionalContext` |
+| SessionStart | (all) | command | `session-start.sh` (greenfield context) | `hookSpecificOutput.additionalContext` |
+| PreCompact | (all) | command | `precompact-roadmap.sh` (roadmap reminder) | `systemMessage` |
+| PreToolUse | Edit\|Write | command | `check-protected-paths.sh` | `hookSpecificOutput.permissionDecision` |
+| PostToolUse | Edit\|Write | command | `check-cruft.sh` | `hookSpecificOutput.additionalContext` |
+| Stop | (all) | command | `stop-hook.sh` (greenfield review) | `systemMessage` |
 
 ### Priming System
 
