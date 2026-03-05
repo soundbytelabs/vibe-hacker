@@ -1,34 +1,32 @@
 {
-  "name": "vibe-hacker",
-  "owner": {
-    "name": "Michael Skiles",
-    "email": "mjrskiles@gmail.com"
+  "metadata": {
+    "title": "Vibe Hacker",
+    "description": "Plugins for hacking, development workflows, and greenfield projects",
+    "author": "Michael Skiles"
   },
-  "description": "Plugins for hacking, development workflows, and greenfield projects",
-  "version": "0.2.5",
-  "license": "MIT",
-  "keywords": [
-    "vibe-hacker",
-    "plugins",
-    "development",
-    "workflows",
-    "greenfield"
-  ],
   "plugins": [
     {
       "name": "greenfield-mode",
+      "version": "0.3.0",
+      "description": "Prevent backwards-compatibility cruft in prototype projects",
       "source": "./plugins/greenfield-mode"
     },
     {
       "name": "primer",
+      "version": "0.3.0",
+      "description": "Context priming - load project files on session start",
       "source": "./plugins/primer"
     },
     {
       "name": "planning",
+      "version": "0.3.0",
+      "description": "Structured planning documents with protected paths",
       "source": "./plugins/planning"
     },
     {
       "name": "expert-agents",
+      "version": "0.3.0",
+      "description": "Domain-specific code auditors: Klaus, Librodotus, Shawn",
       "source": "./plugins/expert-agents"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "name": "greenfield-mode",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Prevent backwards-compatibility cruft in prototype projects",
   "author": {
     "name": "Michael Skiles",
@@ -12,5 +12,7 @@
     "greenfield",
     "prototype",
     "cruft-detection"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json",
+  "commands": "./commands"
 }

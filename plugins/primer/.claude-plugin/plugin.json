@@ -1,6 +1,6 @@
 {
   "name": "primer",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Context priming - load project files on session start",
   "author": {
     "name": "Michael Skiles",
@@ -12,5 +12,7 @@
     "priming",
     "context",
     "session"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json",
+  "commands": "./commands"
 }

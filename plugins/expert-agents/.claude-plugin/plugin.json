@@ -1,6 +1,6 @@
 {
   "name": "expert-agents",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Domain-specific code auditors: Klaus (embedded), Librodotus (docs), Shawn (education)",
   "author": {
     "name": "Michael Skiles",
@@ -15,5 +15,7 @@
     "embedded",
     "documentation",
     "education"
-  ]
+  ],
+  "commands": "./commands",
+  "agents": "./agents"
 }

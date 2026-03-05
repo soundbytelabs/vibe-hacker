@@ -5,8 +5,23 @@
 
 set -euo pipefail
 
+# Config resolution: prefer CLAUDE_PROJECT_DIR, fall back to git root
+find_config() {
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" && -f "$CLAUDE_PROJECT_DIR/.claude/vibe-hacker.json" ]]; then
+        echo "$CLAUDE_PROJECT_DIR/.claude/vibe-hacker.json"
+        return
+    fi
+    local git_root
+    git_root=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+    if [[ -n "$git_root" && -f "$git_root/.claude/vibe-hacker.json" ]]; then
+        echo "$git_root/.claude/vibe-hacker.json"
+        return
+    fi
+    echo ".claude/vibe-hacker.json"
+}
+
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
-CONFIG_FILE="$PROJECT_DIR/.claude/vibe-hacker.json"
+CONFIG_FILE=$(find_config)
 
 # Get planning root from config, default to docs/planning
 PLANNING_ROOT="docs/planning"

@@ -12,7 +12,22 @@
 
 set -euo pipefail
 
-CONFIG_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/vibe-hacker.json"
+# Config resolution: prefer CLAUDE_PROJECT_DIR, fall back to git root
+find_config() {
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" && -f "$CLAUDE_PROJECT_DIR/.claude/vibe-hacker.json" ]]; then
+        echo "$CLAUDE_PROJECT_DIR/.claude/vibe-hacker.json"
+        return
+    fi
+    local git_root
+    git_root=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+    if [[ -n "$git_root" && -f "$git_root/.claude/vibe-hacker.json" ]]; then
+        echo "$git_root/.claude/vibe-hacker.json"
+        return
+    fi
+    echo ".claude/vibe-hacker.json"
+}
+
+CONFIG_FILE=$(find_config)
 
 # Default excludes - config files that contain pattern definitions
 DEFAULT_EXCLUDES=(

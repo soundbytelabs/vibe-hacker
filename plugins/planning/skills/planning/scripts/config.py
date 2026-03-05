@@ -6,6 +6,7 @@ Reads planning configuration from vibe-hacker.json.
 
 import json
 import os
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -81,9 +82,44 @@ def get_project_dir() -> Path:
     return Path(os.environ.get('CLAUDE_PROJECT_DIR', '.'))
 
 
+def _get_git_root(project_dir: Path) -> Optional[Path]:
+    """Get the git root for the given directory, or None if not in a repo."""
+    try:
+        result = subprocess.run(
+            ['git', '-C', str(project_dir), 'rev-parse', '--show-toplevel'],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            return Path(result.stdout.strip())
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return None
+
+
 def get_config_path() -> Path:
-    """Get path to vibe-hacker.json config file."""
-    return get_project_dir() / '.claude' / 'vibe-hacker.json'
+    """Get path to vibe-hacker.json config file.
+
+    Resolution order (multi-repo aware):
+      1. CLAUDE_PROJECT_DIR (authoritative workspace root when set)
+      2. Git root (standalone repo fallback, prevents parent leakage)
+      3. Current directory (last resort)
+    """
+    project_dir = get_project_dir()
+
+    # CLAUDE_PROJECT_DIR is authoritative — it's the workspace root
+    workspace_config = project_dir / '.claude' / 'vibe-hacker.json'
+    if workspace_config.exists():
+        return workspace_config
+
+    # Fall back to git root (prevents parent-repo leakage for standalone use)
+    git_root = _get_git_root(project_dir)
+    if git_root:
+        git_config = git_root / '.claude' / 'vibe-hacker.json'
+        if git_config.exists():
+            return git_config
+
+    # Last resort
+    return workspace_config
 
 
 def load_config() -> dict:
