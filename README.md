@@ -9,7 +9,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 | [greenfield-mode](plugins/greenfield-mode/) | Prevent backwards-compatibility cruft | Prototype projects |
 | [primer](plugins/primer/) | Context priming on session start | Any project |
 | [planning](plugins/planning/) | ADRs, FDPs, Action Plans, Reports, Roadmap | Structured planning |
-| [expert-agents](plugins/expert-agents/) | Klaus, Librodotus, Shawn | Code audits |
+| [expert-agents](plugins/expert-agents/) | Klaus, Librodotus, Shawn + build/test/arch/size agents | Code audits, CI tasks |
 
 ## Quick Start
 

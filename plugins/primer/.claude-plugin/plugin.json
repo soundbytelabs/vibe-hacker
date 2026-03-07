@@ -13,6 +13,5 @@
     "context",
     "session"
   ],
-  "hooks": "./hooks/hooks.json",
   "commands": "./commands"
 }

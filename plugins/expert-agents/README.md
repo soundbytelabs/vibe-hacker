@@ -1,10 +1,12 @@
 # Expert Agents
 
-A Claude Code plugin with domain-specific code auditors.
+A Claude Code plugin with domain-specific agents for code auditing, build verification, testing, and architecture enforcement.
 
 ## Agents
 
-### Klaus - Embedded Quality Auditor
+### Code Auditors
+
+#### Klaus - Embedded Quality Auditor
 
 Klaus is a pedantic embedded systems expert who audits your code for quality issues. Invoke him after major changes or to review unfamiliar codebases.
 
@@ -20,16 +22,9 @@ Klaus is a pedantic embedded systems expert who audits your code for quality iss
 /klaus full      # Full codebase audit
 ```
 
-Klaus checks for common embedded anti-patterns:
-- Dynamic allocation (`malloc` on embedded)
-- Floating point on 8-bit MCUs
-- Fat ISRs (should set flag and exit)
-- Unbounded busy-waits
-- Missing timeouts on blocking calls
+#### Librodotus - Documentation Quality Auditor
 
-### Librodotus - Documentation Quality Auditor
-
-Librodotus is a scholarly documentation purist who ensures your docs are useful, scannable, and accurate. Named after Herodotus--but unlike his namesake, he never embellishes.
+Librodotus is a scholarly documentation purist who ensures your docs are useful, scannable, and accurate.
 
 **Audit types:**
 - `readme` - README scannability, 30-second test
@@ -43,14 +38,9 @@ Librodotus is a scholarly documentation purist who ensures your docs are useful,
 /librodotus full      # Full documentation audit
 ```
 
-Librodotus philosophy:
-- "A README should answer 'what is this?' in 10 seconds."
-- "The best comment explains *why*, not *what*."
-- "Tables are your friend. Walls of text are your enemy."
+#### Shawn - Educational Mentor
 
-### Shawn - Educational Mentor
-
-Shawn is a warm mentor who views projects through an educator's lens. He asks: "What makes this teachable? How can we spark curiosity while building competence?"
+Shawn is a warm mentor who views projects through an educator's lens.
 
 **Review types:**
 - `onboarding` - First five minutes, setup friction, initial success
@@ -64,10 +54,106 @@ Shawn is a warm mentor who views projects through an educator's lens. He asks: "
 /shawn full         # Full educational review
 ```
 
-Shawn's approach:
-- "Can someone see themselves succeeding here?"
-- "What's the first 'aha!' moment, and how quickly can we get there?"
-- "Is the complexity essential, or accidental?"
+### Brainstorm
+
+Interactive brainstorming partner. Interviews you about half-formed ideas through a structured process: Capture (diverge) → Explore (probe) → Distill (converge) → Prioritize (contextualize) → Output (synthesize). Explicitly discards tangents. Produces an opinionated summary with concrete next steps.
+
+```bash
+/brainstorm ladder filter     # Start with a topic
+/brainstorm                   # Open-ended — "what's on your mind?"
+```
+
+**Model:** Opus (interactive, needs deep reasoning and project context)
+
+This runs in the main conversation (not as a background subagent) since it requires back-and-forth with the user.
+
+### Build & Test Agents
+
+#### Build Verifier
+
+Builds all project targets for all CMake presets. Reports pass/fail and binary sizes. Reads project-specific build commands from `vibe-hacker.json` config.
+
+```bash
+/build-verifier              # Build everything
+/build-verifier hello-synth  # Build one project
+```
+
+**Model:** Haiku (mechanical task, no reasoning needed)
+
+#### Test Runner
+
+Runs all configured test suites and diagnoses failures. Reads suite commands from `vibe-hacker.json` or discovers tests from project structure.
+
+```bash
+/test-runner          # Run all suites
+/test-runner unit     # Run matching suite
+```
+
+**Model:** Sonnet (needs reasoning to diagnose failures)
+
+#### Architecture Auditor
+
+Verifies layer boundary rules — no upward `#include` dependencies across architectural layers. Reads rules from `vibe-hacker.json` or derives them from architecture docs.
+
+```bash
+/arch-auditor          # Audit all layers
+/arch-auditor widgets  # Audit one layer
+```
+
+**Model:** Sonnet (needs architectural understanding)
+
+#### Size Tracker
+
+Builds firmware targets and compares binary sizes (text/data/bss) against documented baselines. Flags regressions above a configurable threshold.
+
+```bash
+/size-tracker              # Measure all baselines
+/size-tracker hello-synth  # Measure one target
+```
+
+**Model:** Haiku (mechanical task)
+
+## Configuration
+
+Build & test agents read project-specific config from `.claude/vibe-hacker.json` under the `agents` key:
+
+```json
+{
+  "agents": {
+    "setup": "source .venv/bin/activate",
+    "build_verifier": {
+      "hints": "16 cmake presets across examples/ and debug/",
+      "commands": {
+        "configure": "cmake --preset {preset} --fresh",
+        "build": "cmake --build build/{preset}",
+        "size": "arm-none-eabi-size build/{preset}/{name}.elf"
+      }
+    },
+    "test_runner": {
+      "suites": [
+        {"name": "C++ unit tests", "cmd": "cd test/unit && cmake -B build && cmake --build build && ctest --test-dir build"},
+        {"name": "Python tests", "cmd": "pytest"}
+      ]
+    },
+    "arch_auditor": {
+      "source_root": "src/mylib",
+      "rules": [
+        "core/ must NOT include hal/, drivers/",
+        "hal/ MAY include core/ (intentional)"
+      ]
+    },
+    "size_tracker": {
+      "commands": { "size": "arm-none-eabi-size" },
+      "baselines": [
+        {"project": "examples/blinker", "preset": "target", "text": 1084}
+      ],
+      "threshold_pct": 5
+    }
+  }
+}
+```
+
+If no config exists, agents fall back to reading `CLAUDE.md` and discovering project structure automatically.
 
 ## Installation
 
@@ -78,24 +164,20 @@ Shawn's approach:
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `/klaus [type]` | Embedded quality audit (memory\|timing\|safety\|style\|full) |
-| `/librodotus [type]` | Documentation audit (readme\|code\|architecture\|freshness\|full) |
-| `/shawn [type]` | Educational review (onboarding\|concepts\|examples\|depth\|full) |
-
-## No Configuration Needed
-
-Expert agents are stateless and work out of the box. No configuration required.
+| Command | Description | Model |
+|---------|-------------|-------|
+| `/klaus [type]` | Embedded quality audit | Sonnet |
+| `/librodotus [type]` | Documentation audit | Sonnet |
+| `/shawn [type]` | Educational review | Sonnet |
+| `/brainstorm [topic]` | Interactive idea distillery | Opus |
+| `/build-verifier [filter]` | Build all targets | Haiku |
+| `/test-runner [filter]` | Run all test suites | Sonnet |
+| `/arch-auditor [filter]` | Check layer boundaries | Sonnet |
+| `/size-tracker [filter]` | Binary size comparison | Haiku |
 
 ## Part of Vibe Hacker
 
-This plugin is part of the [vibe-hacker](https://github.com/mjrskiles/vibe-hacker) plugin collection:
-
-- **greenfield-mode** - Cruft prevention for prototypes
-- **primer** - Context priming
-- **planning** - ADRs, FDPs, Action Plans, Reports, Roadmap
-- **expert-agents** (this plugin) - Klaus, Librodotus, Shawn
+This plugin is part of the [vibe-hacker](https://github.com/mjrskiles/vibe-hacker) plugin collection.
 
 ## License
 

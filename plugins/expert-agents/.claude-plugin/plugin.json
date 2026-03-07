@@ -1,7 +1,7 @@
 {
   "name": "expert-agents",
-  "version": "0.3.0",
-  "description": "Domain-specific code auditors: Klaus (embedded), Librodotus (docs), Shawn (education)",
+  "version": "0.4.0",
+  "description": "Domain-specific agents: code auditors, build verification, test runner, architecture audit, size tracking",
   "author": {
     "name": "Michael Skiles",
     "email": "mike@mskiles.com"
@@ -14,8 +14,11 @@
     "audit",
     "embedded",
     "documentation",
-    "education"
+    "education",
+    "build",
+    "test",
+    "architecture",
+    "binary-size"
   ],
-  "commands": "./commands",
-  "agents": "./agents"
+  "commands": "./commands"
 }

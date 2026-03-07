@@ -65,5 +65,39 @@
         "message": "This is a template file. Ensure placeholders are preserved."
       }
     ]
+  },
+  "agents": {
+    "setup": "source .venv/bin/activate",
+    "build_verifier": {
+      "hints": "Describe your build system here",
+      "commands": {
+        "configure": "cmake --preset {preset} --fresh",
+        "build": "cmake --build build/{preset}",
+        "size": "arm-none-eabi-size build/{preset}/{name}.elf"
+      }
+    },
+    "test_runner": {
+      "suites": [
+        {"name": "Unit tests", "cmd": "cd test && cmake -B build && cmake --build build && ctest --test-dir build"}
+      ]
+    },
+    "arch_auditor": {
+      "source_root": "src",
+      "rules": [
+        "core/ must NOT include app/",
+        "hal/ MAY include core/ (intentional)"
+      ]
+    },
+    "size_tracker": {
+      "commands": {"size": "arm-none-eabi-size"},
+      "baselines": [
+        {"project": "examples/blinker", "preset": "target", "text": 1024}
+      ],
+      "threshold_pct": 5
+    },
+    "brainstorm": {
+      "output_dir": "docs/planning/temp",
+      "context_files": ["docs/architecture.md", "docs/planning/roadmap.md"]
+    }
   }
 }
