@@ -1,8 +1,9 @@
 {
-  "metadata": {
-    "title": "Vibe Hacker",
-    "description": "Plugins for hacking, development workflows, and greenfield projects",
-    "author": "Michael Skiles"
+  "name": "vibe-hacker",
+  "description": "Plugins for hacking, development workflows, and greenfield projects",
+  "owner": {
+    "name": "Michael Skiles",
+    "email": "mjrskiles@gmail.com"
   },
   "plugins": [
     {
