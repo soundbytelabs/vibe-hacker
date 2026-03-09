@@ -1,7 +1,7 @@
 {
-  "name": "planning",
-  "version": "0.3.0",
-  "description": "Structured planning documents (ADRs, FDPs, Action Plans) with protected paths",
+  "name": "backlog",
+  "version": "0.1.0",
+  "description": "Lightweight project backlogs for capturing ideas, polish items, and small improvements",
   "author": {
     "name": "Michael Skiles",
     "email": "michael@soundbytelabs.net"
@@ -9,9 +9,9 @@
   "repository": "https://github.com/mjrskiles/vibe-hacker",
   "license": "MIT",
   "keywords": [
-    "planning",
-    "adr",
-    "documentation",
+    "backlog",
+    "ideas",
+    "tracking",
     "workflow"
   ],
   "skills": "./skills"

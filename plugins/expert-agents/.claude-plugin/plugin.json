@@ -4,7 +4,7 @@
   "description": "Domain-specific agents: code auditors, build verification, test runner, architecture audit, size tracking",
   "author": {
     "name": "Michael Skiles",
-    "email": "mike@mskiles.com"
+    "email": "michael@soundbytelabs.net"
   },
   "repository": "https://github.com/mjrskiles/vibe-hacker",
   "license": "MIT",

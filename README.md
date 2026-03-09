@@ -10,6 +10,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 | [primer](plugins/primer/) | Context priming on session start | Any project |
 | [planning](plugins/planning/) | ADRs, FDPs, Action Plans, Reports, Roadmap | Structured planning |
 | [expert-agents](plugins/expert-agents/) | Klaus, Librodotus, Shawn + build/test/arch/size agents | Code audits, CI tasks |
+| [backlog](plugins/backlog/) | Lightweight project backlogs for ideas and polish items | Task tracking |
 
 ## Quick Start
 
@@ -22,6 +23,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 /plugin install primer@vibe-hacker
 /plugin install planning@vibe-hacker
 /plugin install expert-agents@vibe-hacker
+/plugin install backlog@vibe-hacker
 ```
 
 ## Plugin Overview
@@ -118,7 +120,8 @@ Each plugin reads only its relevant keys:
 - `greenfield-mode` reads: `greenfield_mode`, `greenfield_strict`, `greenfield_patterns`
 - `primer` reads: `priming`, `greenfield_mode` (for display)
 - `planning` reads: `planning`, `protected_paths`
-- `expert-agents` reads: nothing (stateless)
+- `expert-agents` reads: `agents` (build_verifier, test_runner, etc.)
+- `backlog` reads: `backlog` (root directory)
 
 ## Repository Structure
 
@@ -128,7 +131,8 @@ vibe-hacker/
 │   ├── greenfield-mode/      # Cruft prevention
 │   ├── primer/               # Context priming
 │   ├── planning/             # Planning documents
-│   └── expert-agents/        # Code auditors
+│   ├── expert-agents/        # Code auditors
+│   └── backlog/              # Project backlogs
 ├── docs/
 │   └── planning/             # This project's planning docs
 ├── templates/
@@ -146,4 +150,4 @@ MIT
 
 ## Author
 
-Michael Skiles (mike@mskiles.com)
+Michael Skiles (michael@soundbytelabs.net)

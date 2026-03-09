@@ -4,7 +4,7 @@
   "description": "Prevent backwards-compatibility cruft in prototype projects",
   "author": {
     "name": "Michael Skiles",
-    "email": "mike@mskiles.com"
+    "email": "michael@soundbytelabs.net"
   },
   "repository": "https://github.com/mjrskiles/vibe-hacker",
   "license": "MIT",
