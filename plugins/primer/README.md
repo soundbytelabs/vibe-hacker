@@ -33,10 +33,44 @@ Create `.claude/vibe-hacker.json` in your project:
 
 | Setting | Type | Description |
 |---------|------|-------------|
-| `priming.files` | string[] | Explicit files to load |
+| `priming.files` | string[] | Default files to load |
 | `priming.globs` | string[] | Glob patterns for multiple files |
+| `priming.repos` | string[] | Repos to show git status for |
 | `priming.instructions` | string | Custom text shown during priming |
 | `priming.haiku` | boolean | Generate a haiku after priming (default: false) |
+| `priming.focuses` | object | Named focus subsets (see below) |
+
+### Focuses
+
+Define named subsets of files for focused work on a specific area:
+
+```json
+{
+  "priming": {
+    "files": ["README.md", "docs/ARCHITECTURE.md"],
+    "focuses": {
+      "dsp": {
+        "files": ["src/dsp/README.md", "docs/dsp-guide.md"],
+        "repos": ["my-dsp-lib"],
+        "globs": ["src/dsp/**/*.hpp"],
+        "instructions": "Focus on the DSP pipeline."
+      },
+      "hw": {
+        "files": ["hardware/README.md"],
+        "repos": ["my-hardware"],
+        "instructions": "Focus on hardware drivers."
+      }
+    }
+  }
+}
+```
+
+Usage:
+- `/prime` — Load default `priming.files`
+- `/prime dsp` — Load only the `dsp` focus files
+- `/prime --list` — List available focuses
+
+Each focus can define its own `files`, `globs`, `repos`, and `instructions`. When a focus is selected, it replaces the defaults — that's the point, narrower context for focused work. If a focus doesn't define `repos`, the top-level `priming.repos` are used as fallback.
 
 ### Fallback Behavior
 
@@ -87,7 +121,9 @@ Code becomes the song
 
 | Command | Description |
 |---------|-------------|
-| `/prime` | Reload project context |
+| `/prime` | Reload default project context |
+| `/prime <focus>` | Load a named focus subset |
+| `/prime --list` | List available focuses |
 
 ## Requirements
 

@@ -1,5 +1,10 @@
 Reload project context from configured priming settings.
 
-Run: `${CLAUDE_PLUGIN_ROOT}/scripts/prime.sh`
+**Usage:**
+- `/prime` — Load all default priming files
+- `/prime <focus>` — Load a named focus subset (e.g., `sbl`, `hw`, `cecrops`)
+- `/prime --list` — List available focuses
 
-This loads all files configured in `.claude/vibe-hacker.json` under `priming.files` and `priming.globs`.
+Run: `${CLAUDE_PLUGIN_ROOT}/scripts/prime.sh` (append any arguments from the user)
+
+This loads files configured in `.claude/vibe-hacker.json`. Without arguments, loads `priming.files`. With a focus name, loads `priming.focuses.<name>.files` instead — a narrower context for focused work.

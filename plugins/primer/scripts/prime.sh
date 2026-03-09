@@ -4,6 +4,11 @@
 # Loads project context from .claude/vibe-hacker.json config.
 # Falls back to README.md / CLAUDE.md if no config.
 #
+# Usage:
+#   prime.sh              # Load default priming files
+#   prime.sh <focus>      # Load named focus (e.g., "sbl", "hw", "cecrops")
+#   prime.sh --list       # List available focuses
+#
 # Config resolution (multi-repo aware):
 #   1. CLAUDE_PROJECT_DIR (authoritative workspace root when set)
 #   2. Git root (standalone repo fallback, prevents parent leakage)
@@ -14,6 +19,8 @@
 # - stdout: JSON with additionalContext (for Claude's context injection)
 
 set -euo pipefail
+
+FOCUS="${1:-}"
 
 # --- Config Resolution ---
 
@@ -41,6 +48,50 @@ cd "$PROJECT_DIR"
 
 CONFIG_FILE=$(find_config)
 
+# --- Focus resolution ---
+
+list_focuses() {
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "No config file found" >&2
+        return 1
+    fi
+
+    local focuses
+    focuses=$(jq -r '.priming.focuses // empty | keys[]' "$CONFIG_FILE" 2>/dev/null || true)
+
+    if [[ -z "$focuses" ]]; then
+        echo "No focuses configured in priming.focuses" >&2
+        return 1
+    fi
+
+    echo "Available focuses:" >&2
+    while IFS= read -r name; do
+        local desc
+        desc=$(jq -r ".priming.focuses[\"$name\"].instructions // \"(no description)\"" "$CONFIG_FILE" 2>/dev/null || echo "(no description)")
+        # Truncate long descriptions
+        if [[ ${#desc} -gt 70 ]]; then
+            desc="${desc:0:67}..."
+        fi
+        echo "  $name — $desc" >&2
+    done <<< "$focuses"
+}
+
+if [[ "$FOCUS" == "--list" ]]; then
+    list_focuses
+    exit 0
+fi
+
+# Validate focus if provided
+if [[ -n "$FOCUS" && -f "$CONFIG_FILE" ]]; then
+    focus_exists=$(jq -r ".priming.focuses[\"$FOCUS\"] // empty" "$CONFIG_FILE" 2>/dev/null || true)
+    if [[ -z "$focus_exists" ]]; then
+        echo "Unknown focus: '$FOCUS'" >&2
+        echo "" >&2
+        list_focuses
+        exit 1
+    fi
+fi
+
 # --- Collect priming data ---
 
 declare -a FILES=()
@@ -60,25 +111,43 @@ if [[ -f "$CONFIG_FILE" ]]; then
     [[ "$hk" == "true" ]] && HAIKU="enabled"
 fi
 
-# Load priming config
+# Load priming config — either from focus or from defaults
 if [[ -f "$CONFIG_FILE" ]]; then
-    INSTRUCTIONS=$(jq -r '.priming.instructions // empty' "$CONFIG_FILE" 2>/dev/null || true)
+    if [[ -n "$FOCUS" ]]; then
+        # Focus mode: load from priming.focuses.$FOCUS
+        INSTRUCTIONS=$(jq -r ".priming.focuses[\"$FOCUS\"].instructions // empty" "$CONFIG_FILE" 2>/dev/null || true)
 
-    while IFS= read -r file; do
-        [[ -n "$file" && -f "$file" ]] && FILES+=("$file")
-    done < <(jq -r '.priming.files[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+        while IFS= read -r file; do
+            [[ -n "$file" && -f "$file" ]] && FILES+=("$file")
+        done < <(jq -r ".priming.focuses[\"$FOCUS\"].files[]? // empty" "$CONFIG_FILE" 2>/dev/null || true)
 
-    while IFS= read -r pattern; do
-        if [[ -n "$pattern" ]]; then
-            for file in $pattern; do
-                [[ -f "$file" ]] && FILES+=("$file")
-            done
-        fi
-    done < <(jq -r '.priming.globs[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+        while IFS= read -r pattern; do
+            if [[ -n "$pattern" ]]; then
+                for file in $pattern; do
+                    [[ -f "$file" ]] && FILES+=("$file")
+                done
+            fi
+        done < <(jq -r ".priming.focuses[\"$FOCUS\"].globs[]? // empty" "$CONFIG_FILE" 2>/dev/null || true)
+    else
+        # Default mode: load from priming.files/globs
+        INSTRUCTIONS=$(jq -r '.priming.instructions // empty' "$CONFIG_FILE" 2>/dev/null || true)
+
+        while IFS= read -r file; do
+            [[ -n "$file" && -f "$file" ]] && FILES+=("$file")
+        done < <(jq -r '.priming.files[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+
+        while IFS= read -r pattern; do
+            if [[ -n "$pattern" ]]; then
+                for file in $pattern; do
+                    [[ -f "$file" ]] && FILES+=("$file")
+                done
+            fi
+        done < <(jq -r '.priming.globs[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+    fi
 fi
 
-# Fallback if no files configured
-if [[ ${#FILES[@]} -eq 0 ]]; then
+# Fallback if no files configured (only in default mode)
+if [[ ${#FILES[@]} -eq 0 && -z "$FOCUS" ]]; then
     [[ -f ".claude/CLAUDE.md" ]] && FILES+=(".claude/CLAUDE.md")
     [[ -f "README.md" ]] && FILES+=("README.md")
 
@@ -148,9 +217,24 @@ REPO_STATUS_TEXT=""
 
 if [[ -f "$CONFIG_FILE" ]]; then
     declare -a REPOS=()
-    while IFS= read -r repo; do
-        [[ -n "$repo" ]] && REPOS+=("$repo")
-    done < <(jq -r '.priming.repos[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+
+    if [[ -n "$FOCUS" ]]; then
+        # Focus mode: use focus-specific repos, fall back to top-level
+        while IFS= read -r repo; do
+            [[ -n "$repo" ]] && REPOS+=("$repo")
+        done < <(jq -r ".priming.focuses[\"$FOCUS\"].repos[]? // empty" "$CONFIG_FILE" 2>/dev/null || true)
+
+        # Fall back to top-level repos if focus doesn't define any
+        if [[ ${#REPOS[@]} -eq 0 ]]; then
+            while IFS= read -r repo; do
+                [[ -n "$repo" ]] && REPOS+=("$repo")
+            done < <(jq -r '.priming.repos[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+        fi
+    else
+        while IFS= read -r repo; do
+            [[ -n "$repo" ]] && REPOS+=("$repo")
+        done < <(jq -r '.priming.repos[]? // empty' "$CONFIG_FILE" 2>/dev/null || true)
+    fi
 
     if [[ ${#REPOS[@]} -gt 0 ]]; then
         for repo in "${REPOS[@]}"; do
@@ -185,7 +269,11 @@ fi
 # --- Display to terminal (stderr) ---
 
 {
-    echo "=== CONTEXT PRIMING ==="
+    if [[ -n "$FOCUS" ]]; then
+        echo "=== CONTEXT PRIMING (focus: $FOCUS) ==="
+    else
+        echo "=== CONTEXT PRIMING ==="
+    fi
     echo ""
 
     if [[ -n "$REPO_STATUS_TEXT" ]]; then
@@ -216,6 +304,10 @@ fi
 # --- Build context for Claude (stdout JSON) ---
 
 CONTEXT_PARTS=()
+
+if [[ -n "$FOCUS" ]]; then
+    CONTEXT_PARTS+=("FOCUS: $FOCUS")
+fi
 
 if [[ -n "$REPO_STATUS_TEXT" ]]; then
     CONTEXT_PARTS+=("$REPO_STATUS_TEXT")
