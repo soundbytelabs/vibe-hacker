@@ -10,6 +10,8 @@ Vibe Hacker is a Claude Code plugin that provides four core capabilities:
 2. **Greenfield Mode** - Prevent backwards-compatibility cruft in prototype projects
 3. **Protected Paths** - Control file access with tiered protection (readonly, guided, remind)
 4. **Planning Skill** - Manage ADRs, FDPs, and Action Plans with proper lifecycle
+5. **Backlog Skill** - Lightweight task tracking for ideas and polish items
+6. **Briefcase Skill** - Personal thought management with capture, briefing, and tidy
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐

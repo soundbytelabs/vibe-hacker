@@ -11,6 +11,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 | [planning](plugins/planning/) | ADRs, FDPs, Action Plans, Reports, Roadmap | Structured planning |
 | [expert-agents](plugins/expert-agents/) | Klaus, Librodotus, Shawn + build/test/arch/size agents | Code audits, CI tasks |
 | [backlog](plugins/backlog/) | Lightweight project backlogs for ideas and polish items | Task tracking |
+| [briefcase](plugins/briefcase/) | Personal thought management — capture, brief, tidy | Knowledge stewardship |
 
 ## Quick Start
 
@@ -24,6 +25,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 /plugin install planning@vibe-hacker
 /plugin install expert-agents@vibe-hacker
 /plugin install backlog@vibe-hacker
+/plugin install briefcase@vibe-hacker
 ```
 
 ## Plugin Overview
@@ -70,6 +72,24 @@ Structured planning documents with protected paths.
 **Config:** `planning`, `protected_paths`
 
 [Full documentation](plugins/planning/README.md)
+
+### briefcase
+
+Personal thought management — capture stray ideas, brief on topics, reorganize.
+
+**Features:**
+- Quick capture with automatic topic triage
+- Synthesized briefings (not regurgitation)
+- Periodic tidy: merge, split, promote, archive
+
+**Commands:**
+- `/briefcase "thought"` - Capture a thought
+- `/briefcase brief [topic]` - Get briefed on your thinking
+- `/briefcase tidy` - Reorganize suggestions
+
+**Config:** `briefcase` (root directory)
+
+[Full documentation](plugins/briefcase/skills/briefcase/SKILL.md)
 
 ### expert-agents
 
@@ -122,6 +142,7 @@ Each plugin reads only its relevant keys:
 - `planning` reads: `planning`, `protected_paths`
 - `expert-agents` reads: `agents` (build_verifier, test_runner, etc.)
 - `backlog` reads: `backlog` (root directory)
+- `briefcase` reads: `briefcase` (root directory)
 
 ## Repository Structure
 
@@ -132,7 +153,8 @@ vibe-hacker/
 │   ├── primer/               # Context priming
 │   ├── planning/             # Planning documents
 │   ├── expert-agents/        # Code auditors
-│   └── backlog/              # Project backlogs
+│   ├── backlog/              # Project backlogs
+│   └── briefcase/            # Personal thought management
 ├── docs/
 │   └── planning/             # This project's planning docs
 ├── templates/
