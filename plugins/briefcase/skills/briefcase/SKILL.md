@@ -33,6 +33,8 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/briefcase/scripts/manage.py <command> [args
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/briefcase/scripts/manage.py add "<thought>" [--topic <topic>]
 ```
 
+**IMPORTANT: Use the user's exact words.** When capturing a thought, pass the user's message verbatim as the `<thought>` string. Do not paraphrase, embellish, add interpretation, or rewrite in your own voice. The briefcase records *their* thinking, not your summary of it. If the user says "I was thinking about spinning out briefcase to a separate plugin after the demo" then that exact sentence is what gets captured — not a cleaned-up or expanded version.
+
 If `--topic` is provided, the thought is appended to that topic file. If omitted, you must triage the thought yourself:
 
 1. Read existing topic files with `list`
