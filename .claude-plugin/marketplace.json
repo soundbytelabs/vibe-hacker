@@ -35,6 +35,12 @@
       "version": "0.1.0",
       "description": "Lightweight project backlogs for ideas, polish items, and small improvements",
       "source": "./plugins/backlog"
+    },
+    {
+      "name": "briefcase",
+      "version": "0.1.0",
+      "description": "Personal thought management — capture stray ideas, brief on topics, reorganize accumulated thinking",
+      "source": "./plugins/briefcase"
     }
   ]
 }

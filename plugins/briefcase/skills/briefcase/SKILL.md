@@ -83,6 +83,21 @@ Moves a topic to `archive/` subdirectory. Use when a thought thread has been res
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/briefcase/scripts/manage.py rename <old-topic> <new-topic>
 ```
 
+## Chat
+
+When the user asks to chat about a topic (e.g., `/briefcase chat library-vision`), enter a conversational exploration mode:
+
+1. Read the topic file from the configured root
+2. Internalize the entries — understand the arc of thinking, the tensions, the open questions
+3. **Start a conversation, not a monologue.** Open with what seems most alive in the topic — the unresolved tension, the most recent thread, or the question that keeps recurring
+4. Ask a probing question to pull the thread further. Your job is to help the user think, not to summarize what they already wrote down.
+5. As the conversation progresses, **capture new insights back to the topic file** using the `add` script with `--topic`. Don't ask permission for every capture — use judgment. If the user says something that crystallizes a new thought, capture it.
+6. If the conversation surfaces something actionable, suggest promoting it (to backlog, FDP, etc.) but don't push — the briefcase is a low-pressure zone.
+
+**Tone:** Thoughtful collaborator, not interviewer. You have context on the project (architecture, roadmap, design philosophy) — connect dots the user might not see between their briefcase thoughts and the broader project state. Push back gently when thinking seems stuck or circular.
+
+**End state:** The topic file should have new entries reflecting what emerged from the conversation. The user should feel like they made progress on their thinking.
+
 ## Brief
 
 When the user asks for a briefing (e.g., `/briefcase brief` or `/briefcase brief library-vision`), do NOT use the script. Instead:
@@ -144,6 +159,7 @@ When the user invokes `/briefcase`, parse their intent from the arguments:
 | `/briefcase add "thought" --topic foo` | Capture to specific topic |
 | `/briefcase brief` | Brief on all topics |
 | `/briefcase brief library-vision` | Brief on one topic |
+| `/briefcase chat library-vision` | Conversational exploration of a topic |
 | `/briefcase topics` or `/briefcase list` | List all topics |
 | `/briefcase tidy` | Reorganize suggestions |
 | `/briefcase create foo "description"` | Create a new topic |
