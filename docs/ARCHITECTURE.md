@@ -1,349 +1,180 @@
 # Architecture
 
-This document describes the architecture of the Vibe Hacker plugin for Claude Code.
+This document describes the architecture of the Vibe Hacker plugin collection for Claude Code.
 
 ## Overview
 
-Vibe Hacker is a Claude Code plugin that provides four core capabilities:
+Vibe Hacker is a collection of six independent Claude Code plugins that share a single configuration file (`.claude/vibe-hacker.json`). Each plugin is self-contained with its own hooks, scripts, skills, and agents.
 
-1. **Context Priming** - Automatically load project context on session start
-2. **Greenfield Mode** - Prevent backwards-compatibility cruft in prototype projects
-3. **Protected Paths** - Control file access with tiered protection (readonly, guided, remind)
-4. **Planning Skill** - Manage ADRs, FDPs, and Action Plans with proper lifecycle
-5. **Backlog Skill** - Lightweight task tracking for ideas and polish items
-6. **Briefcase Skill** - Personal thought management with capture, briefing, and tidy
+| Plugin | Purpose |
+|--------|---------|
+| **greenfield-mode** | Prevent backwards-compatibility cruft in prototype projects |
+| **primer** | Automatically load project context on session start |
+| **planning** | Manage ADRs, FDPs, Action Plans, Reports with lifecycle and protection |
+| **expert-agents** | Domain-specific auditors (Klaus, Librodotus, Shawn) + build/test/arch/size agents |
+| **backlog** | Lightweight task tracking for ideas and polish items |
+| **briefcase** | Personal thought management with capture, briefing, and tidy |
+
+## Plugin Structure
+
+Each plugin follows the same layout:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                              Claude Code                                    │
-├────────────────────────────────────────────────────────────────────────────┤
-│  Hooks System                                                               │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐    │
-│  │  Session  │ │    Pre    │ │    Pre    │ │   Post    │ │   Stop    │    │
-│  │   Start   │ │  Compact  │ │  ToolUse  │ │  ToolUse  │ │           │    │
-│  │  (prime)  │ │ (roadmap) │ │ (protect) │ │  (cruft)  │ │ (review)  │    │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘    │
-│        │             │             │             │             │           │
-│        ▼             ▼             ▼             ▼             ▼           │
-│  ┌──────────────────────────────────────────────────────────────────┐     │
-│  │                       Vibe Hacker Plugin                          │     │
-│  │  ┌────────┐ ┌──────────┐ ┌─────────────┐ ┌────────────┐ ┌──────┐ │     │
-│  │  │prime.sh│ │precompact│ │check-protect│ │check-legacy│ │Haiku │ │     │
-│  │  │        │ │-roadmap  │ │ ed-paths.sh │ │ -cruft.sh  │ │Prompt│ │     │
-│  │  └───┬────┘ └────┬─────┘ └──────┬──────┘ └─────┬──────┘ └──┬───┘ │     │
-│  └──────┼───────────┼──────────────┼──────────────┼───────────┼─────┘     │
-│         │           │              │              │           │            │
-│         ▼           ▼              ▼              ▼           ▼            │
-│  ┌───────────┐ ┌──────────┐ ┌───────────┐ ┌───────────┐ ┌──────────┐     │
-│  │vibe-hacker│ │ roadmap  │ │  Config   │ │  Edited   │ │Transcript│     │
-│  │   .json   │ │   .md    │ │   Rules   │ │   Files   │ │          │     │
-│  └───────────┘ └──────────┘ └───────────┘ └───────────┘ └──────────┘     │
-└────────────────────────────────────────────────────────────────────────────┘
+plugins/<name>/
+├── .claude-plugin/
+│   └── plugin.json          # Plugin manifest (name, version, hooks/skills refs)
+├── hooks/
+│   └── hooks.json           # Hook configuration (optional)
+├── scripts/                 # Shell/Python scripts for hooks (optional)
+├── commands/                # Slash command definitions (optional)
+├── agents/                  # Agent definitions (optional)
+├── skills/                  # Skill definitions (optional)
+├── templates/               # Config examples (optional)
+└── README.md
 ```
 
-## Components
+Plugins are installed independently — you can pick just the ones you need:
 
-### Plugin Manifest
-
-**Location**: `.claude-plugin/plugin.json`
-
-Defines plugin metadata and references hook configuration:
-
-```json
-{
-  "name": "vibe-hacker",
-  "version": "0.1.0",
-  "hooks": "./hooks/hooks.json"
-}
+```bash
+/plugin marketplace add /path/to/vibe-hacker
+/plugin install primer@vibe-hacker        # Just context priming
+/plugin install planning@vibe-hacker      # Just planning documents
 ```
 
-### Hook Configuration
+## Shared Configuration
 
-**Location**: `hooks/hooks.json`
+All plugins read from a single file: `.claude/vibe-hacker.json` in your project root.
 
-Configures hooks:
+Each plugin reads only its relevant keys:
 
-| Hook | Matcher | Type | Script/Prompt | Output Pattern |
-|------|---------|------|---------------|----------------|
-| SessionStart | (all) | command | `prime.sh` | `hookSpecificOutput.additionalContext` |
-| SessionStart | compact | command | `prime.sh` (re-prime after compaction) | `hookSpecificOutput.additionalContext` |
-| SessionStart | (all) | command | `session-start.sh` (greenfield context) | `hookSpecificOutput.additionalContext` |
-| PreCompact | (all) | command | `precompact-roadmap.sh` (roadmap reminder) | `systemMessage` |
-| PreToolUse | Edit\|Write | command | `check-protected-paths.sh` | `hookSpecificOutput.permissionDecision` |
-| PostToolUse | Edit\|Write | command | `check-cruft.sh` | `hookSpecificOutput.additionalContext` |
-| Stop | (all) | command | `stop-hook.sh` (greenfield review) | `systemMessage` |
+| Plugin | Config Keys |
+|--------|-------------|
+| greenfield-mode | `greenfield_mode`, `greenfield_strict`, `greenfield_patterns` |
+| primer | `priming` (files, globs, repos, instructions, focuses), `greenfield_mode` |
+| planning | `planning` (version, subdirs), `protected_paths` (rules) |
+| expert-agents | `agents` (setup, build_verifier, test_runner, arch_auditor, size_tracker) |
+| backlog | `backlog` (root directory) |
+| briefcase | `briefcase` (root directory) |
 
-### Priming System
+## Hook System
 
-**Script**: `scripts/prime.sh`
+Plugins use Claude Code hooks to inject behavior at specific lifecycle points:
 
-**Purpose**: Load project context into Claude's working memory.
-
-**Modes**:
-- `--full`: Read and output file contents (default, used by SessionStart)
-- `--light`: List available files without reading contents
-- `--check`: Dry run showing what would be primed
-
-**Fallback Chain**:
 ```
-.claude/vibe-hacker.json  →  Configured files/globs
-        ↓ (missing)
-.claude/CLAUDE.md         →  Project guidelines
-        ↓ (missing)
-README.md                 →  Basic project info
-        ↓ (missing)
-docs/                     →  Scan for markdown files
+Session Start ──► primer/prime.sh            Load project context
+                  greenfield-mode/session-start.sh   Show greenfield status
+
+Pre-Compact  ──► planning/precompact-roadmap.sh     Remind to update roadmap
+
+Pre-ToolUse  ──► planning/check-protected-paths.sh  Enforce file access tiers
+
+Post-ToolUse ──► greenfield-mode/check-cruft.sh     Detect cruft in edited files
+
+Stop         ──► greenfield-mode/stop-hook.sh       Greenfield review
 ```
 
-**vibe-hacker.json priming Schema**:
-```json
-{
-  "priming": {
-    "files": ["path/to/file.md"],
-    "globs": ["docs/**/*.md"],
-    "instructions": "Custom priming instructions"
-  }
-}
-```
+### Hook Output Patterns
 
-### Legacy Cruft Detection
+Hooks communicate back to Claude Code using specific output patterns:
 
-**Script**: `scripts/check-legacy-cruft.sh`
-
-**Purpose**: Detect backwards-compatibility patterns that shouldn't exist in greenfield projects.
-
-**Default Patterns** (used when `greenfield_patterns` not configured):
-- `deprecated`, `@deprecated`
-- `legacy`, `obsolete`
-- `backwards.compat`, `backward.compat`
-- `for.compatibility`, `compat.shim`
-- `TODO.*remove`, `TODO.*migrate`
-
-Note: Patterns are case-insensitive (uses `grep -i`).
-
-**Custom Patterns** (in `vibe-hacker.json`):
-```json
-{
-  "greenfield_patterns": ["deprecated", "legacy", "FIXME: compat"]
-}
-```
-When configured, custom patterns fully replace the defaults.
-
-**Modes**:
-- Default: Exit 2 (block) on detection
-- `--warn-only`: Exit 0 (warn) on detection
-
-**Input Sources**:
-- Hook stdin (JSON with `tool_input.file_path`)
-- Command line arguments
-- Git diff (uncommitted changes)
-
-### Protected Paths System
-
-**Script**: `scripts/check-protected-paths.sh`
-
-**Purpose**: Control file access with tiered protection rules.
-
-**Protection Tiers**:
-
-| Tier | Behavior | Exit Code | Use Case |
-|------|----------|-----------|----------|
-| `readonly` | Block edit completely | Non-zero with `permissionDecision: "deny"` | Archives, historical records |
-| `guided` | Block with skill suggestion | Non-zero | Planning docs needing managed workflow |
-| `remind` | Warn but allow edit | 0 | Templates, config files |
-
-**Rule Matching**:
-- Uses bash glob patterns (extended globbing with `**`)
-- First matching rule wins
-- No match = allow edit
-
-**Configuration** (in `vibe-hacker.json`):
-```json
-{
-  "protected_paths": {
-    "planning_root": "docs/planning",
-    "rules": [
-      {"pattern": "docs/planning/*/archive/**", "tier": "readonly", "message": "..."},
-      {"pattern": "docs/planning/**/*.md", "tier": "guided", "skill": "planning", "message": "..."}
-    ]
-  }
-}
-```
-
-### Planning Skill
-
-**Location**: `skills/planning/`
-
-**Purpose**: Manage planning documents (ADRs, FDPs, Action Plans, Reports, Roadmap) with proper numbering and lifecycle.
-
-**Components**:
-- `SKILL.md` - Skill documentation (auto-invoked when guided tier suggests it)
-- `scripts/new.py` - Create new documents with auto-numbering
-- `scripts/archive.py` - Move completed documents to archive
-- `scripts/list.py` - List active documents with status
-- `scripts/update-status.py` - Update document status
-- `scripts/append.py` - Add addenda to locked documents
-- `scripts/supersede.py` - Create document that supersedes another
-- `scripts/relate.py` - Link related documents
-- `scripts/edit.py` - Check edit permission by status
-- `scripts/vibe-doc.py` - Migration tool (status, upgrade, changelog)
-- `scripts/init-roadmap.py` - Initialize project roadmap from template
-- `scripts/config.py` - Shared configuration utilities
-- `scripts/frontmatter.py` - YAML frontmatter parsing/rendering
-- `templates/` - Document templates (ADR, FDP, AP, Report, Roadmap)
-
-**Document Lifecycle**:
-```
-ADR:     Proposed → Accepted → [Superseded | Deprecated]
-FDP:     Proposed → In Progress → [Implemented | Abandoned]
-AP:      Active → [Completed | Abandoned]
-Report:  Draft → Published → [Superseded | Obsoleted]
-Roadmap: Living document (updated before compaction)
-```
-
-### Greenfield Review (Stop Hook)
-
-**Type**: Prompt-based (Haiku LLM)
-
-**Purpose**: Review Claude's work for greenfield violations before session ends.
-
-**Violations Checked**:
-- Deprecation comments
-- Backwards-compatibility code
-- Migration documentation
-- Re-exports and unused variable renaming
-
-**Response Format**:
-```json
-{
-  "decision": "approve",
-  "reason": "WARNING - GREENFIELD VIOLATION: [issue]"
-}
-```
-
-### Debug Mode
-
-**Script**: `scripts/log-tool-result.sh`
-
-**Purpose**: Log tool failures for debugging when `debug_mode` is enabled.
-
-**Behavior**:
-- Runs on all PostToolUse events
-- Checks `tool_response.success` field
-- Logs failures to `.claude/temp/tool-failures.log`
-- Always exits 0 (never blocks)
-
-**Priming Integration**:
-When debug mode is enabled, `prime.sh` outputs instructions for agents to write bug reports to `.claude/temp/bug-report-<description>.md`.
-
-**Configuration**:
-```json
-{
-  "debug_mode": true
-}
-```
+| Pattern | Effect |
+|---------|--------|
+| `hookSpecificOutput.additionalContext` | Inject context into Claude's awareness |
+| `hookSpecificOutput.permissionDecision` | Allow or deny a tool use |
+| `systemMessage` | Display a system message |
 
 ## Data Flow
 
 ### Session Start
 ```
-SessionStart hook (or compact matcher)
-      │
-      ▼
-prime.sh --full
-      │
-      ├── Read .claude/vibe-hacker.json
-      │   └── Load configured files and globs
-      │
-      └── (fallback chain if no config)
-      │
-      ▼
-Output file contents to Claude context
+SessionStart
+    │
+    ├── primer/prime.sh
+    │   ├── Read .claude/vibe-hacker.json
+    │   ├── Load configured files, globs, repos
+    │   └── Output contents as additionalContext
+    │
+    └── greenfield-mode/session-start.sh
+        └── Output greenfield reminder if enabled
 ```
 
 ### Code Editing
 ```
-User requests edit
-      │
-      ▼
 Claude uses Edit/Write tool
-      │
-      ▼
-PreToolUse hook triggers
-      │
-      ▼
-check-protected-paths.sh
-      │
-      ├── Parse JSON input for file_path
-      ├── Load rules from vibe-hacker.json
-      ├── Match against patterns
-      │
-      ▼
-┌─────────────────────────────────────────────┐
-│  readonly: Block (permissionDecision: deny) │
-│  guided:   Block + show skill commands      │
-│  remind:   Warn + allow (exit 0)            │
-│  no match: Allow (exit 0)                   │
-└─────────────────────────────────────────────┘
-      │ (if allowed)
-      ▼
-PostToolUse hook triggers
-      │
-      ▼
-check-legacy-cruft.sh
-      │
-      ├── Grep for legacy patterns
-      │
-      ▼
-Warn if patterns found (exit 0)
+    │
+    ▼
+PreToolUse ──► planning/check-protected-paths.sh
+    │
+    ├── readonly:  Block (permissionDecision: deny)
+    ├── guided:    Block + suggest skill
+    ├── remind:    Warn + allow
+    └── no match:  Allow
+    │
+    ▼ (if allowed)
+PostToolUse ──► greenfield-mode/check-cruft.sh
+    │
+    └── Warn if cruft patterns found in edited file
 ```
 
-### Session End
-```
-Claude finishes response
-      │
-      ▼
-Stop hook triggers
-      │
-      ▼
-Haiku reviews transcript
-      │
-      ├── Check for greenfield violations
-      │
-      ▼
-Approve with warning if violations found
-```
+## Skills
+
+Skills are interactive capabilities invoked via slash commands:
+
+| Skill | Plugin | Invocation |
+|-------|--------|------------|
+| Planning | planning | `/planning new fdp "Title"`, `/planning list` |
+| Backlog | backlog | `/backlog add davis "item"`, `/backlog review davis` |
+| Briefcase | briefcase | `/briefcase "thought"`, `/briefcase brief` |
+
+Skills use Python scripts for file operations and rely on Claude for analysis tasks (review, brief, tidy, chat).
+
+## Agents
+
+Agents are specialized Claude instances spawned for specific tasks:
+
+| Agent | Plugin | Model | Purpose |
+|-------|--------|-------|---------|
+| Klaus | expert-agents | Sonnet | Embedded quality audit |
+| Librodotus | expert-agents | Sonnet | Documentation audit |
+| Shawn | expert-agents | Sonnet | Educational review |
+| Brainstorm | expert-agents | Opus | Interactive idea distillery |
+| Build Verifier | expert-agents | Haiku | Build all targets |
+| Test Runner | expert-agents | Sonnet | Run tests, diagnose failures |
+| Arch Auditor | expert-agents | Sonnet | Layer boundary verification |
+| Size Tracker | expert-agents | Haiku | Binary size comparison |
+| Cruft Auditor | greenfield-mode | Sonnet | Greenfield cruft scan |
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_PLUGIN_ROOT` | Path to plugin directory (for hook scripts) |
-| `CLAUDE_PROJECT_DIR` | Path to project using the plugin |
+| `CLAUDE_PLUGIN_ROOT` | Path to the specific plugin directory |
+| `CLAUDE_PROJECT_DIR` | Path to the project using the plugin |
 
-## Extending the Plugin
+## Extending
 
-### Adding a New Hook
+### Adding a new plugin
 
-1. Add configuration to `hooks/hooks.json`
-2. Create script in `scripts/` if command-based
-3. Document in this file
+1. Create a directory under `plugins/`
+2. Add `.claude-plugin/plugin.json` with name, version, description
+3. Add hooks, skills, agents, or commands as needed
+4. Register in `.claude-plugin/marketplace.json` at the repo root
+5. Add a README.md
 
-### Adding a New Command
+### Adding a hook to an existing plugin
 
-1. Create markdown file in `commands/`
-2. Add frontmatter with description and allowed-tools
-3. Document in README.md
+1. Add configuration to the plugin's `hooks/hooks.json`
+2. Create the script in the plugin's `scripts/`
 
-### Modifying Detection Patterns
+### Adding an agent
 
-Edit `CRUFT_PATTERNS` array in `scripts/check-legacy-cruft.sh`.
+1. Create a markdown file in the plugin's `agents/` directory
+2. Optionally add a matching command in `commands/` for slash-command access
 
 ## Design Decisions
 
-See `docs/planning/decision-records/` for architectural decisions.
+See `docs/planning/decision-records/` for architectural decisions:
 
-## References
-
-- [Claude Code Hooks Guide](https://docs.anthropic.com/claude-code/hooks)
-- [Claude Code Plugins Reference](https://docs.anthropic.com/claude-code/plugins)
+- **001** - Greenfield mode (why and how)
+- **002** - Context priming (session start loading)
+- **003** - Script language choice (shell for hooks, Python for complex logic)

@@ -73,6 +73,20 @@ Structured planning documents with protected paths.
 
 [Full documentation](plugins/planning/README.md)
 
+### backlog
+
+Lightweight task tracking for ideas, polish items, and small improvements.
+
+**Commands:**
+- `/backlog add davis "Add velocity"` - Add an item
+- `/backlog davis` - List items in a backlog
+- `/backlog done davis 3` - Mark done
+- `/backlog review davis` - Analyze and prioritize
+
+**Config:** `backlog` (root directory)
+
+[Full documentation](plugins/backlog/skills/backlog/SKILL.md)
+
 ### briefcase
 
 Personal thought management — capture stray ideas, brief on topics, reorganize.

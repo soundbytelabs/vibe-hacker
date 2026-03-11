@@ -177,7 +177,14 @@ If no config exists, agents fall back to reading `CLAUDE.md` and discovering pro
 
 ## Part of Vibe Hacker
 
-This plugin is part of the [vibe-hacker](https://github.com/mjrskiles/vibe-hacker) plugin collection.
+This plugin is part of the [vibe-hacker](https://github.com/mjrskiles/vibe-hacker) plugin collection:
+
+- **greenfield-mode** - Cruft prevention for prototypes
+- **primer** - Context priming
+- **planning** - ADRs, FDPs, Action Plans, Reports, Roadmap
+- **expert-agents** (this plugin) - Code auditors, build/test/arch/size agents
+- **backlog** - Lightweight project backlogs
+- **briefcase** - Personal thought management
 
 ## License
 
