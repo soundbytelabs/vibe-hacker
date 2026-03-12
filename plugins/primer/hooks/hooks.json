@@ -10,17 +10,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/haiku-on-submit.sh",
-            "timeout": 5000
-          }
-        ]
-      }
     ]
   }
 }

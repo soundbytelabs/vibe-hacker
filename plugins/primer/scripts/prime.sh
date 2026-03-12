@@ -327,13 +327,9 @@ for file in "${UNIQUE[@]}"; do
 ${content}")
 done
 
-# If haiku enabled, write a marker file for the UserPromptSubmit hook to pick up.
-# We can't request the haiku here because SessionStart additionalContext goes to
-# system-reminders, which Claude is told not to proactively respond to.
+# If haiku enabled, add request directly to additionalContext.
 if [[ "$HAIKU" == "enabled" ]]; then
-    MARKER_DIR="${CLAUDE_PROJECT_DIR:-$PROJECT_DIR}/.claude"
-    mkdir -p "$MARKER_DIR"
-    echo "haiku" > "$MARKER_DIR/.primer-haiku-pending"
+    CONTEXT_PARTS+=("HAIKU REQUEST: Please write a creative haiku (5-7-5 syllables) that captures the essence of this project based on the primed context. This confirms you are primed and ready.")
 fi
 
 FULL_CONTEXT=$(printf '%s\n\n' "${CONTEXT_PARTS[@]}" | jq -Rs '.')
