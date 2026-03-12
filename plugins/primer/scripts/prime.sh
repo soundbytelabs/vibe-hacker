@@ -107,7 +107,7 @@ fi
 # Check haiku mode
 HAIKU="disabled"
 if [[ -f "$CONFIG_FILE" ]]; then
-    hk=$(jq -r '.priming.haiku // false' "$CONFIG_FILE" 2>/dev/null || echo "false")
+    hk=$(jq -r '.priming.haiku // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
     [[ "$hk" == "true" ]] && HAIKU="enabled"
 fi
 
@@ -327,8 +327,13 @@ for file in "${UNIQUE[@]}"; do
 ${content}")
 done
 
+# If haiku enabled, write a marker file for the UserPromptSubmit hook to pick up.
+# We can't request the haiku here because SessionStart additionalContext goes to
+# system-reminders, which Claude is told not to proactively respond to.
 if [[ "$HAIKU" == "enabled" ]]; then
-    CONTEXT_PARTS+=("HAIKU REQUEST: Please write a creative haiku (5-7-5 syllables) that captures the essence of this project based on the primed content above. This confirms you are ready.")
+    MARKER_DIR="${CLAUDE_PROJECT_DIR:-$PROJECT_DIR}/.claude"
+    mkdir -p "$MARKER_DIR"
+    echo "haiku" > "$MARKER_DIR/.primer-haiku-pending"
 fi
 
 FULL_CONTEXT=$(printf '%s\n\n' "${CONTEXT_PARTS[@]}" | jq -Rs '.')

@@ -37,7 +37,7 @@ Create `.claude/vibe-hacker.json` in your project:
 | `priming.globs` | string[] | Glob patterns for multiple files |
 | `priming.repos` | string[] | Repos to show git status for |
 | `priming.instructions` | string | Custom text shown during priming |
-| `priming.haiku` | boolean | Generate a haiku after priming (default: false) |
+| `priming.haiku` | boolean | Generate a haiku after priming (default: true) |
 | `priming.focuses` | object | Named focus subsets (see below) |
 
 ### Focuses
