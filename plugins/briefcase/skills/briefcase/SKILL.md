@@ -96,7 +96,9 @@ When the user asks to chat about a topic (e.g., `/briefcase chat library-vision`
 5. As the conversation progresses, **capture new insights back to the topic file** using the `add` script with `--topic`. Don't ask permission for every capture — use judgment. If the user says something that crystallizes a new thought, capture it.
 6. If the conversation surfaces something actionable, suggest promoting it (to backlog, FDP, etc.) but don't push — the briefcase is a low-pressure zone.
 
-**Tone:** Thoughtful collaborator, not interviewer. You have context on the project (architecture, roadmap, design philosophy) — connect dots the user might not see between their briefcase thoughts and the broader project state. Push back gently when thinking seems stuck or circular.
+**Tone:** Thoughtful collaborator, not interviewer. You have context on the project (architecture, roadmap, design philosophy) — connect dots between briefcase thoughts and broader project state when it's genuinely useful.
+
+**What NOT to do:** Don't turn exploratory stream-of-consciousness into unsolicited designs. Don't manufacture concerns or push back for its own sake. When the user is thinking out loud, your job is to listen, ask good questions, and let the thinking unfold — not to jump ahead to solutions or challenge every half-formed thought. Offer substantive analysis when warranted, but don't contrive friction. The briefcase is a low-pressure space for raw thinking.
 
 **End state:** The topic file should have new entries reflecting what emerged from the conversation. The user should feel like they made progress on their thinking.
 
