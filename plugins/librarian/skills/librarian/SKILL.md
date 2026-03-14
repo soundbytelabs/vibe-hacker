@@ -1,10 +1,10 @@
 ---
-name: planning
+name: librarian
 description: Manage planning documents (ADRs, FDPs, action plans, reports). Use when creating, archiving, or listing planning docs. Enforces proper numbering and structure.
 allowed-tools: Read, Write, Bash, Glob, Grep
 ---
 
-# Planning Skill
+# Librarian Skill
 
 Manage planning documents with proper structure, numbering, and lifecycle.
 
@@ -17,6 +17,28 @@ Manage planning documents with proper structure, numbering, and lifecycle.
 | AP | Action Plan | `AP-001` | `action-plans/` |
 | Report | Reports and analysis | `RPT-001` | `reports/` |
 | Roadmap | Project goals and vision | N/A | `roadmap.md` |
+
+## Workspace Targeting
+
+This workspace has planning documents in multiple locations. Infer the correct `--project-dir` from conversational context.
+
+| Location | Contents | When to use |
+|----------|----------|-------------|
+| `docs/planning/` (workspace root) | Cross-cutting ADRs, FDPs, APs, RPTs | Library architecture, shared infrastructure, DSP widgets |
+| `sbl-apps/docs/planning/` | App-level FDPs, APs, product briefs | Davis family, app-specific designs |
+| `sbl-apps/davis-jr/docs/planning/` | Product-specific reports | Davis Jr. tuning, gain staging |
+| `tools/plugins/vibe-hacker/docs/planning/` | Tool ADRs, FDPs, APs | vibe-hacker plugin development |
+
+**Heuristics:**
+- Discussing a widget, atom, library feature, or cross-cutting architecture → workspace root (default)
+- Discussing Davis Jr., macros, app behavior, product design → `sbl-apps/`
+- Discussing vibe-hacker, planning system, plugins → `tools/plugins/vibe-hacker/`
+- When ambiguous, ask the user or default to workspace root
+
+Pass the target via `--project-dir`:
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/new.py fdp "Title" --project-dir /absolute/path/to/sbl-apps
+```
 
 ## Document Format (v0.2.1)
 
@@ -97,7 +119,7 @@ Configure planning in `.claude/vibe-hacker.json`:
 
 ## When to Use This Skill
 
-Use the planning scripts when:
+Use the librarian scripts when:
 - Creating a new planning document (ensures proper numbering and frontmatter)
 - Updating a document's status (e.g., Proposed → Accepted)
 - Adding an addendum to a locked document
@@ -109,12 +131,12 @@ Use the planning scripts when:
 
 ## Available Scripts
 
-All scripts are in `${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/`.
+All scripts are in `${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/`.
 
 ### Create New Document
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/new.py <type> "<title>"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/new.py <type> "<title>" [--project-dir PATH]
 ```
 
 Types: `adr`, `fdp`, `ap`, `report`
@@ -125,6 +147,7 @@ python3 scripts/new.py adr "Use PostgreSQL for persistence"
 python3 scripts/new.py fdp "User Authentication System"
 python3 scripts/new.py ap "Implement login flow"
 python3 scripts/new.py report "Q4 Performance Analysis"
+python3 scripts/new.py fdp "Davis Mixer" --project-dir /path/to/sbl-apps
 ```
 
 ### Add Addendum
@@ -132,7 +155,7 @@ python3 scripts/new.py report "Q4 Performance Analysis"
 Add notes or updates to any document, even locked ones:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/append.py <doc-id> "<title>" [--body "<content>"]
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/append.py <doc-id> "<title>" [--body "<content>"]
 ```
 
 Examples:
@@ -146,7 +169,7 @@ python3 scripts/append.py ADR-001 "Migration note" --body "Use pg_dump for best 
 Create a new document that supersedes an existing one:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/supersede.py <old-doc-id> "<new-title>"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/supersede.py <old-doc-id> "<new-title>"
 ```
 
 This will:
@@ -165,7 +188,7 @@ python3 scripts/supersede.py ADR-001 "Revised Database Strategy"
 Link documents together:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/relate.py <doc-id> <related-ids...> [--bidirectional]
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/relate.py <doc-id> <related-ids...> [--bidirectional]
 ```
 
 Examples:
@@ -177,7 +200,7 @@ python3 scripts/relate.py ADR-001 FDP-003 ADR-002 --bidirectional
 ### Update Status
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/update-status.py <doc-id> <new-status>
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/update-status.py <doc-id> <new-status>
 ```
 
 Examples:
@@ -196,8 +219,10 @@ Valid statuses by type:
 ### Archive Document
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/archive.py <doc-id>
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/archive.py <doc-id> [--project-dir PATH]
 ```
+
+Archiving moves the document to `archive/` and generates an `ARCHIVE.md` index in the type directory listing all archived documents.
 
 Examples:
 ```bash
@@ -205,10 +230,15 @@ python3 scripts/archive.py ADR-001
 python3 scripts/archive.py FDP-002
 ```
 
+To rebuild the archive index without archiving a document:
+```bash
+python3 scripts/archive.py --regenerate-index [--type TYPE] [--project-dir PATH]
+```
+
 ### Check Edit Permission
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/edit.py <doc-id> [--force] [--quiet]
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/edit.py <doc-id> [--force] [--quiet]
 ```
 
 Checks if a document can be edited based on its status. Outputs the file path if editable.
@@ -224,7 +254,7 @@ Checks if a document can be edited based on its status. Outputs the file path if
 ### List Documents
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/list.py [--type TYPE] [--status STATUS] [--include-archived]
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/list.py [--type TYPE] [--status STATUS] [--include-archived]
 ```
 
 Examples:
@@ -241,10 +271,10 @@ python3 scripts/list.py --include-archived
 Upgrade existing documents to the latest format:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/vibe-doc.py status
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/vibe-doc.py upgrade --dry-run
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/vibe-doc.py upgrade
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/vibe-doc.py changelog 0.2.0
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/vibe-doc.py status
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/vibe-doc.py upgrade --dry-run
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/vibe-doc.py upgrade
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/vibe-doc.py changelog 0.2.0
 ```
 
 ## Document Lifecycle
@@ -300,7 +330,7 @@ The roadmap is a single markdown file tracking project goals at different time h
 ### Initialize Roadmap
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/init-roadmap.py
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/init-roadmap.py
 ```
 
 A **PreCompact hook** reminds you to update the roadmap before context compaction.
@@ -316,7 +346,7 @@ The `edit.py` script provides additional validation based on document status.
 
 ## Templates
 
-Templates are in `${CLAUDE_PLUGIN_ROOT}/skills/planning/templates/`:
+Templates are in `${CLAUDE_PLUGIN_ROOT}/skills/librarian/templates/`:
 - `adr.md` - Architecture Decision Record
 - `fdp.md` - Feature Design Proposal
 - `action-plan.md` - Action Plan

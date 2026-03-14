@@ -1,5 +1,5 @@
 {
-  "name": "planning",
+  "name": "librarian",
   "version": "0.3.0",
   "description": "Structured planning documents (ADRs, FDPs, Action Plans) with protected paths",
   "author": {
@@ -9,7 +9,7 @@
   "repository": "https://github.com/mjrskiles/vibe-hacker",
   "license": "MIT",
   "keywords": [
-    "planning",
+    "librarian",
     "adr",
     "documentation",
     "workflow"

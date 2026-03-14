@@ -1,4 +1,4 @@
-# Planning
+# Librarian
 
 A Claude Code plugin for structured planning documents with protected paths.
 
@@ -11,6 +11,7 @@ Manage ADRs, FDPs, Action Plans, Reports, and Roadmaps with:
 - Document relationships (supersedes, related)
 - Append-only addenda for locked documents
 - Automatic numbering and lifecycle management
+- Archive index generation for decluttered directories
 
 | Type | Purpose | ID Format | Default Dir |
 |------|---------|-----------|-------------|
@@ -44,9 +45,11 @@ python3 scripts/list.py --type adr
 python3 scripts/list.py --type report
 ```
 
-**Archiving completed documents**:
+**Archiving completed documents** (generates ARCHIVE.md index):
 ```bash
 python3 scripts/archive.py ADR-001
+python3 scripts/archive.py FDP-002
+python3 scripts/archive.py --regenerate-index  # rebuild index without archiving
 ```
 
 ### New in v0.2.1
@@ -91,7 +94,7 @@ PreCompact hook reminds you to update the roadmap before context compaction.
 
 ```bash
 /plugin marketplace add /path/to/vibe-hacker
-/plugin install planning@vibe-hacker
+/plugin install librarian@vibe-hacker
 ```
 
 ## Configuration
@@ -120,8 +123,8 @@ Create `.claude/vibe-hacker.json` in your project:
       {
         "pattern": "docs/planning/**/*.md",
         "tier": "remind",
-        "skill": "planning",
-        "message": "Use the planning skill to manage these."
+        "skill": "librarian",
+        "message": "Use the librarian skill to manage these."
       }
     ]
   }
@@ -191,7 +194,7 @@ This plugin is part of the [vibe-hacker](https://github.com/mjrskiles/vibe-hacke
 
 - **greenfield-mode** - Cruft prevention for prototypes
 - **primer** - Context priming
-- **planning** (this plugin) - ADRs, FDPs, Action Plans, Reports, Roadmap
+- **librarian** (this plugin) - ADRs, FDPs, Action Plans, Reports, Roadmap
 - **expert-agents** - Code auditors, build/test/arch/size agents
 - **backlog** - Lightweight project backlogs
 - **briefcase** - Personal thought management

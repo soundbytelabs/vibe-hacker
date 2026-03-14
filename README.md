@@ -8,7 +8,7 @@ A collection of Claude Code plugins for hacking, development workflows, and gree
 |--------|-------------|----------|
 | [greenfield-mode](plugins/greenfield-mode/) | Prevent backwards-compatibility cruft | Prototype projects |
 | [primer](plugins/primer/) | Context priming on session start | Any project |
-| [planning](plugins/planning/) | ADRs, FDPs, Action Plans, Reports, Roadmap | Structured planning |
+| [librarian](plugins/librarian/) | ADRs, FDPs, Action Plans, Reports, Roadmap | Structured planning |
 | [expert-agents](plugins/expert-agents/) | Klaus, Librodotus, Shawn + build/test/arch/size agents | Code audits, CI tasks |
 | [backlog](plugins/backlog/) | Lightweight project backlogs for ideas and polish items | Task tracking |
 | [briefcase](plugins/briefcase/) | Personal thought management — capture, brief, tidy | Knowledge stewardship |
@@ -71,7 +71,7 @@ Structured planning documents with protected paths.
 
 **Config:** `planning`, `protected_paths`
 
-[Full documentation](plugins/planning/README.md)
+[Full documentation](plugins/librarian/README.md)
 
 ### backlog
 

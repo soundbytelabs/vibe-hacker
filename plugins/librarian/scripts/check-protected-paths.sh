@@ -206,21 +206,21 @@ This file matches pattern: $pattern"
             local reason="PROTECTED PATH: $file_path
 
 $message"
-            if [[ -n "$skill" && "$skill" == "planning" ]]; then
+            if [[ -n "$skill" && "$skill" == "librarian" ]]; then
                 reason="$reason
 
-To manage planning documents, use the planning skill scripts:
+To manage planning documents, use the librarian skill scripts:
 
   # Create new documents (auto-numbered)
-  python3 \${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/new.py adr \"Title\"
-  python3 \${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/new.py fdp \"Title\"
-  python3 \${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/new.py ap \"Title\"
+  python3 \${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/new.py adr \"Title\"
+  python3 \${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/new.py fdp \"Title\"
+  python3 \${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/new.py ap \"Title\"
 
   # Archive documents
-  python3 \${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/archive.py ADR-001
+  python3 \${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/archive.py ADR-001
 
   # List documents
-  python3 \${CLAUDE_PLUGIN_ROOT}/skills/planning/scripts/list.py"
+  python3 \${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/list.py"
             elif [[ -n "$skill" ]]; then
                 reason="$reason
 

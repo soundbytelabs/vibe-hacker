@@ -122,7 +122,7 @@ Skills are interactive capabilities invoked via slash commands:
 
 | Skill | Plugin | Invocation |
 |-------|--------|------------|
-| Planning | planning | `/planning new fdp "Title"`, `/planning list` |
+| Librarian | librarian | `/librarian new fdp "Title"`, `/librarian list` |
 | Backlog | backlog | `/backlog add davis "item"`, `/backlog review davis` |
 | Briefcase | briefcase | `/briefcase "thought"`, `/briefcase brief` |
 
