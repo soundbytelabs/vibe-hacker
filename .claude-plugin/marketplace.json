@@ -25,22 +25,10 @@
       "source": "./plugins/planning"
     },
     {
-      "name": "expert-agents",
-      "version": "0.4.0",
-      "description": "Domain-specific agents: code auditors, build verification, test runner, architecture audit, size tracking",
-      "source": "./plugins/expert-agents"
-    },
-    {
       "name": "backlog",
       "version": "0.1.0",
       "description": "Lightweight project backlogs for ideas, polish items, and small improvements",
       "source": "./plugins/backlog"
-    },
-    {
-      "name": "briefcase",
-      "version": "0.1.0",
-      "description": "Personal thought management — capture stray ideas, brief on topics, reorganize accumulated thinking",
-      "source": "./plugins/briefcase"
     }
   ]
 }

@@ -251,6 +251,29 @@ Checks if a document can be edited based on its status. Outputs the file path if
 
 **Tip**: Use `append.py` to add an addendum instead of force-editing locked documents.
 
+### Review Open Documents
+
+Show all planning documents not in a terminal state, with brief summaries. Use this to audit what's still open and decide what to archive, advance, or abandon.
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/librarian/scripts/review.py [--type TYPE] [--project-dir PATH]
+```
+
+Examples:
+```bash
+python3 scripts/review.py                     # Review all open documents
+python3 scripts/review.py --type fdp          # Review open FDPs only
+python3 scripts/review.py --project-dir /path/to/sbl-apps  # Review app-level plans
+```
+
+Terminal statuses (excluded from review):
+- **ADR**: accepted, deprecated, superseded
+- **FDP**: implemented, abandoned
+- **AP**: completed, abandoned
+- **Report**: published, superseded, obsoleted
+
+Documents with non-standard statuses (e.g., "Complete" instead of "Implemented") will show up — that's intentional, as it surfaces docs that need status cleanup.
+
 ### List Documents
 
 ```bash
