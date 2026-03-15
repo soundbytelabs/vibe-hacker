@@ -19,10 +19,10 @@
       "source": "./plugins/primer"
     },
     {
-      "name": "planning",
+      "name": "librarian",
       "version": "0.3.0",
       "description": "Structured planning documents with protected paths",
-      "source": "./plugins/planning"
+      "source": "./plugins/librarian"
     },
     {
       "name": "backlog",
