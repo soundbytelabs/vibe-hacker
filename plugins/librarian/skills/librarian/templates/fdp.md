@@ -52,10 +52,6 @@ Technical details, data structures, algorithms, etc.
 ### Phase 2: Enhancements
 - Follow-up work
 
-## Alternatives Considered
-
-What other approaches were evaluated? Why were they not chosen?
-
 ## Open Questions
 
 What remains to be determined?

@@ -32,10 +32,6 @@ What is the change that we're proposing and/or doing?
 
 What becomes easier or more difficult to do because of this change?
 
-## Alternatives Considered
-
-What other approaches were evaluated? Why were they not chosen?
-
 ## Open Questions
 
 What remains to be determined?
